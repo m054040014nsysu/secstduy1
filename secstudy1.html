@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Survey Entry</title>
+  <script>
+    function generateID(length = 6) {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let id = '';
+      for (let i = 0; i < length; i++) {
+        id += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return id;
+    }
+
+    const groupA_URL = "https://www.surveycake.com/s/80N4l"; // A 組
+    const groupB_URL = "https://www.surveycake.com/s/GQLMN"; // B 組
+    const scriptURL = "https://script.google.com/macros/s/AKfycbz28Y6r4e4lusTPy9I0U4JPXZQukPRM9dllCcZV9utS9a16sJPl7dhTNGT-6DwiNfPu/exec"; // ✅ 你的部署網址
+
+    window.onload = function () {
+      const surveyID = generateID();
+      const rand = Math.random();
+      let group = "";
+      let targetURL = "";
+
+      if (rand < 0.5) {
+        group = "Group A";
+        targetURL = groupA_URL;
+      } else {
+        group = "Group B";
+        targetURL = groupB_URL;
+      }
+
+      document.getElementById("group").innerText = group;
+      document.getElementById("survey-id").innerText = surveyID;
+
+      // 傳送資料到 Google Sheets
+      fetch(scriptURL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+          surveyID: surveyID,
+          group: group
+        })
+      })
+      .then(res => res.text())
+      .then(res => console.log("Server response:", res))
+      .catch(err => console.error("Logging error:", err));
+
+      // 問卷連結
+      const button = document.getElementById("start-button");
+      button.href = targetURL;
+      button.onclick = function () {
+        alert("You will now begin the survey.\n\nPlease enter the following Survey ID in the first question:\n\n" + surveyID);
+      };
+    };
+  </script>
+</head>
+<body>
+  <h2>Welcome</h2>
+  <p>You have been randomly assigned to <strong><span id="group">...</span></strong>.</p>
+
+  <p>Your <strong>Survey ID</strong> is:</p>
+  <p style="font-size: 1.6em; color: darkgreen;"><strong><span id="survey-id">...</span></strong></p>
+
+  <p>Please write down this Survey ID. You will be asked to enter it at the beginning of the survey, and again when submitting your task on MTurk.</p>
+
+  <a id="start-button" href="#" target="_blank">
+    <button style="padding: 10px 20px; font-size: 16px;">Begin Survey</button>
+  </a>
+</body>
+</html>
